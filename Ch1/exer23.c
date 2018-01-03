@@ -7,25 +7,29 @@
 main()
 {
     int c, incomment, insngquotes, indbquotes, fslash, bslash, star;
-    
+
     incomment = insngquotes = indbquotes = fslash = bslash = star = NO;
 
     while ((c = getchar()) != EOF) {
 	if (c == '/') {
-	    if (star) { /* end of comment */
+	    if (star) { /* end of comment (cannot be in quotes b/c star flag never set when in quotes) */
 		incomment = NO;
 		fslash = NO;
 		star = NO;
 	    }
 	    else if (!incomment) { /* slashes inside comments are disregarded */
-		if (!fslash) { /* might be start of comment */
+		if (!fslash && !indbquotes) { /* not in string literal; might be start of comment */
 		    fslash = YES;
-		}
+		}	
 
-		else { /* slash after slash, so we print one slash (the other might be printed later */
+		/* slashes in double quotes (i.e. in string literals) are simply printed, or slash after slash  */
+		else {
+		    fslash = !indbquotes; /* only set fslash flag if we are not in quotes, otherwise disable */
 		    putchar(c);
 		}
 	    }
+
+	    bslash = NO;
 	}
 	else if (c == '*') {
 	    if (incomment) { /* might be end of comment */
@@ -36,6 +40,8 @@ main()
 	    }
 	    else /* not in comment and not preceded by slash */
 		putchar(c);
+	    
+	    bslash = NO;
 	}
 	else if (!incomment) { /* not in a comment and current char not a * or / */
 	    if (fslash) {
@@ -45,13 +51,19 @@ main()
 		putchar('*');
 	    }
 
-	    if (c == '\'' && !indbquotes)
-		insngquotes = !insngquotes;
-	    
-	    else if (c == '"') {
-		indbquotes = !indbquotes;
+	    if (c == '\\' && (insngquotes || indbquotes)) {
+		bslash = !bslash;
 	    }
-	    fslash = star = NO;
+	    else {
+		if (c == '\'' && !indbquotes && !bslash)
+		    insngquotes = !insngquotes;
+
+		else if (c == '"' && !insngquotes && !bslash) {
+		    indbquotes = !indbquotes;
+		}
+		fslash = bslash = star = NO;
+	    }
+	    
 	    putchar(c);
 	}
 	else if (incomment) { /* in a comment, but not at a * or /, so reset flags */
