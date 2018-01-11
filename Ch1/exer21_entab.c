@@ -10,7 +10,8 @@ void print_whitespace(int whitespace, int col);
 
 main()
 {
-    /* col counts, from 0 to 7, the current column of the cursor.
+    /* col counts, from 0 to 7, the current column of the cursor, with respect
+     * to the last tabstop.
      * whitespace counts the total amount of whitespace columns since the last
      * tabstop.
      * tabstops counts the total number of tabstops passed since the last
@@ -69,13 +70,12 @@ main()
  * whitespace indicates the total number of whitespace columns that must be
  * printed.
  *
- * col (from 1 to 7) indicates the distance since the last col
+ * col (from 1 to 7) indicates the distance since the last tabstop
  */
 void print_whitespace(int whitespace, int col) {
     int i, numspaces, numtabs;
 
     if (whitespace > col) { /* at least one tabstop passed */
-	/* printf("true, col: %i, whitespace: %i\n", col, whitespace); */
 	putchar('\t');
 	whitespace -= COLUMNS - col;
     }
